@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "characters": {
+    "钟山": {
+      "appearance": "80岁，身形挺拔偏瘦，威严窄脸，白发后束，白色长眉与长须，深色锐利双眼",
+      "clothing": "深红色古代锦袍，暗金抽象云纹与寿纹，黑色宽腰带",
+      "temperament": "不怒自威，坚毅深沉",
+      "reference_images": [
+        "F:\\AI Agent\\my-skills\\novel-to-comic-output\\长生不死\\角色基准\\scene-01-钟山.png"
+      ],
+      "current_changes": []
+    },
+    "钟天": {
+      "appearance": "约50岁，身材壮实，方圆脸，深色发髻，鬓角略白，眼神忠厚谨慎",
+      "clothing": "深蓝色古代长袍，灰蓝腰带",
+      "temperament": "敦厚沉稳，恭敬忠诚",
+      "reference_images": [
+        "F:\\AI Agent\\my-skills\\novel-to-comic-output\\长生不死\\角色基准\\scene-02-钟天.png"
+      ],
+      "current_changes": []
+    },
+    "钟十九": {
+      "appearance": "32岁，精瘦结实，清秀英气，深色长发高束，眉眼明亮",
+      "clothing": "墨绿色古代劲装，黑色护腕和腰封",
+      "temperament": "朝气、直率、略带腼腆",
+      "reference_images": [
+        "F:\\AI Agent\\my-skills\\novel-to-comic-output\\长生不死\\角色基准\\scene-03-钟十九.png"
+      ],
+      "current_changes": []
+    }
+  }
+}
