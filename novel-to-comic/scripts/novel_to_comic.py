@@ -15,6 +15,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import shutil
 import sys
 import tempfile
 from dataclasses import dataclass
@@ -286,22 +287,57 @@ def generate_scene_filename(scene_num, description, ext=".png"):
     return f"scene-{scene_num:02d}-{slug}{ext}"
 
 
+def place_generated_image(
+    source_path,
+    novel_name,
+    chapter_title,
+    scene_num,
+    description,
+    base_dir=None,
+):
+    """Copy a generated image into the novel/chapter output structure."""
+    source = Path(source_path)
+    if not source.is_file():
+        raise FileNotFoundError(f"Generated image does not exist: {source}")
+
+    chapter_dir = create_output_dir(novel_name, chapter_title, base_dir)
+    filename = generate_scene_filename(
+        scene_num, description, source.suffix or ".png"
+    )
+    target = chapter_dir / filename
+    if source.resolve() != target.resolve():
+        shutil.copy2(source, target)
+    return target
+
+
 def main() -> int:
     """CLI entry point."""
     import argparse
     parser = argparse.ArgumentParser(description="Novel to Comic helper")
     parser.add_argument("--url", help="URL of the novel chapter")
+    parser.add_argument("--text-output",
+                        help="Write the complete extracted chapter to this file")
     parser.add_argument("--novel", help="Novel name")
     parser.add_argument("--chapter", help="Chapter title")
     parser.add_argument("--output", help="Base output directory")
     parser.add_argument("--create-dir", action="store_true",
                         help="Create output directory structure")
+    parser.add_argument("--place-image",
+                        help="Copy a generated image into the chapter directory")
+    parser.add_argument("--scene", type=int, help="Scene number for --place-image")
+    parser.add_argument("--description",
+                        help="Scene description for --place-image")
 
     args = parser.parse_args()
 
     if args.url:
         result = extract_text_from_url_with_diagnostics(args.url)
         if result.text:
+            if args.text_output:
+                text_output = Path(args.text_output)
+                text_output.parent.mkdir(parents=True, exist_ok=True)
+                text_output.write_text(result.text, encoding="utf-8")
+                print(f"[OK] Saved complete chapter text: {text_output}")
             print(f"[OK] Extracted {len(result.text)} characters from URL")
             print("--- Preview (first 200 chars) ---")
             print(result.text[:200])
@@ -314,6 +350,28 @@ def main() -> int:
     if args.create_dir and args.novel and args.chapter:
         chapter_dir = create_output_dir(args.novel, args.chapter, args.output)
         print(f"[OK] Output directory: {chapter_dir}")
+
+    if args.place_image:
+        missing = [
+            name for name, value in (
+                ("--novel", args.novel),
+                ("--chapter", args.chapter),
+                ("--scene", args.scene),
+                ("--description", args.description),
+            )
+            if value is None
+        ]
+        if missing:
+            parser.error(f"--place-image requires {', '.join(missing)}")
+        target = place_generated_image(
+            args.place_image,
+            args.novel,
+            args.chapter,
+            args.scene,
+            args.description,
+            args.output,
+        )
+        print(f"[OK] Archived generated image: {target}")
     return 0
 
 

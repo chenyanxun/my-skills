@@ -187,6 +187,57 @@ class NovelToComicTests(unittest.TestCase):
             stack.enter_context(mock.patch("sys.stdout", io.StringIO()))
             self.assertEqual(novel_to_comic.main(), 0)
 
+    def test_main_writes_complete_extracted_text_to_file(self):
+        complete_text = "完整章节" * 100
+        result = novel_to_comic.ExtractionResult(
+            complete_text, ("readability: success",)
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / "chapter.txt"
+            with ExitStack() as stack:
+                stack.enter_context(mock.patch.object(
+                    novel_to_comic,
+                    "extract_text_from_url_with_diagnostics",
+                    return_value=result,
+                ))
+                stack.enter_context(mock.patch.object(
+                    sys,
+                    "argv",
+                    [
+                        "novel_to_comic.py",
+                        "--url",
+                        "https://example.com",
+                        "--text-output",
+                        str(output),
+                    ],
+                ))
+                stack.enter_context(mock.patch("sys.stdout", io.StringIO()))
+                self.assertEqual(novel_to_comic.main(), 0)
+
+            self.assertEqual(output.read_text(encoding="utf-8"), complete_text)
+
+    def test_place_generated_image_copies_into_chapter_directory(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "generated.png"
+            source.write_bytes(b"image-data")
+
+            target = novel_to_comic.place_generated_image(
+                source,
+                "测试:小说",
+                "第一章",
+                2,
+                "角色登场",
+                root / "output",
+            )
+
+            self.assertTrue(source.exists())
+            self.assertEqual(target.read_bytes(), b"image-data")
+            self.assertEqual(
+                target.relative_to(root / "output").as_posix(),
+                "测试_小说/第一章/scene-02-角色登场.png",
+            )
+
     def test_script_entry_point_raises_system_exit_from_main(self):
         source = MODULE_PATH.read_text(encoding="utf-8")
         self.assertIn('raise SystemExit(main())', source)

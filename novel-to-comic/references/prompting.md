@@ -1,73 +1,80 @@
-# Comic-Style Prompting Guide
+# Cursor GenerateImage 提示词指南
 
-## Prompt 结构模板
+## 工具参数
 
-`
-Use case: illustration-story
-Asset type: comic/manga panel
-Primary request: [场景描述]
-Style/medium: [选定漫画风格关键词]
-Scene/backdrop: [环境背景]
-Subject: [角色外貌、服装、动作、表情]
-Composition/framing: [远景/中景/特写等]
-Lighting/mood: [光线和氛围]
-Color palette: [色调]
-Text: ""
+```text
+description: 画面主体、动作、环境、构图、风格、色调、光线、情绪和约束
+filename: scene-01-简短描述.png
+reference_image_paths: ["角色A基准图路径", "角色B基准图路径"]
+aspect_ratio: 1:1 | 3:4 | 4:3 | 16:9 | 9:16
+```
+
+`filename` 只写文件名，不包含目录。工具返回的路径才是实际保存路径。
+
+## Description 模板
+
+```text
+Create a single comic illustration, not a multi-panel page.
+Style: [漫画风格及媒介]
+Story moment: [本场景发生的关键事件]
+Characters: [每个角色的固定外貌、服装、表情和动作]
+Environment: [地点、时代、天气、时间和关键道具]
+Composition: [景别、视角、主体位置、动作方向和空间关系]
+Lighting and mood: [光线、色调、情绪]
+Continuity: [与上一场景保持一致的特征]
 Constraints: no text, no speech bubbles, no captions, no letters, no watermark
-`
+```
 
-## 角色一致性策略
+描述具体可见的瞬间，不把整段剧情、心理解释或多个时间点塞入一张图。
 
-### 角色描述模板
+## 角色卡
 
-`
-[角色名] - [年龄/性别/体型] - [发型/发色] - [眼睛特征] - [服装] - [气质]
-`
+每个角色固定记录：
 
-示例:
-- 林轩 - 20岁男性 - 中等身材 - 黑色短发 - 深邃黑眸 - 青色长袍/腰佩长剑 - 冷峻
-- 苏小小 - 18岁女性 - 娇小 - 及腰黑发/红色发带 - 水灵杏眼 - 浅粉襦裙 - 活泼
+```text
+[角色名]｜[年龄感/性别表现/体型]｜[脸型与五官]｜[发型发色]
+｜[固定服装与颜色]｜[标志物]｜[气质]｜[当前剧情变化]
+```
 
-### 跨场景传递
+示例：
 
-1. 第一个场景写完整角色描述
-2. 后续场景只需写差异(服装变化、受伤等)
-3. 优先用 characters.json 中的描述
+```text
+林轩｜约20岁男性、中等偏瘦｜窄脸、深邃黑眸｜利落黑色短发
+｜青色交领长袍、深色腰封｜腰佩旧银长剑｜冷峻克制｜右肩有新伤
+```
 
-## 不同风格关键词
+## 一致性策略
 
-### 日式漫画(Manga)
-- manga style, Japanese comic art
-- black and white, screentone textures, crosshatch
-- dynamic lines, expressive eyes
-- tonal gradation, halftone dots
+1. 第一张角色清晰出现的图片使用完整角色卡。
+2. 后续场景继续写固定特征，不能只写角色姓名。
+3. 将最清晰、最准确的已生成角色图以路径数组传入 `reference_image_paths`。
+4. 重要角色优先使用脸部清晰、无遮挡、服装完整的基准图；必要时先用 `1:1` 生成角色基准图。
+5. 多人场景为每个主要角色提供一张基准图，并分别说明站位、身高差、服装颜色和动作。
+6. 剧情导致换装、受伤或年龄变化时，更新 `characters.json` 的变化字段。
+7. 参考图本身有错误时不得继续传播，改用更早的正确图片。
 
-### 中国漫画(Manhua)
-- Chinese manhua style, full color digital painting
-- detailed lineart, vibrant colors
-- beautiful character designs, fantasy setting
-- smooth rendering, soft lighting
+## 风格关键词
 
-### 韩国漫画(Manhwa/Webtoon)
-- Korean webtoon style, digital art
-- soft rendering, pastel tones, glowing effects
-- beautiful faces, slender proportions
-- dramatic lighting, sparkle effects
+- 日式漫画：`Japanese manga, black and white, screentone, crosshatching, expressive linework`
+- 中国漫画：`Chinese manhua, full-color digital painting, detailed line art, cinematic fantasy lighting`
+- 韩国条漫：`Korean manhwa, webtoon illustration, clean line art, soft rendering, dramatic lighting`
+- 美式漫画：`American comic book art, bold ink outlines, dynamic anatomy, vivid colors`
+- 水墨风：`Chinese ink wash painting, expressive brushwork, flowing ink, poetic negative space`
+- 绘本风：`storybook illustration, soft watercolor, gentle shapes, warm paper texture`
 
-### 水墨风
-- Chinese ink wash painting style, shui mo hua
-- brush strokes, flowing ink, negative space
-- minimalist, poetic atmosphere
+## 构图选择
 
-## 场景构图建议
+- 战斗：中景或全景、倾斜视角、明确动作方向
+- 对话：中景或过肩镜头、突出双方空间关系
+- 情绪：面部特写、浅景深、克制背景
+- 环境建立：远景、人物比例较小、突出地点规模
+- 登场：中全景、低机位、轮廓光
+- 悬念：局部特写、遮挡构图、低调照明
+- 离别：远景或背影、留白、冷暖色分离
 
-| 场景类型 | 推荐构图 | 说明 |
-|---------|---------|------|
-| 战斗/对决 | 中景+动态角度 | 展示动作和双方位置 |
-| 对话/交谈 | 中景+过肩镜头 | 展示表情和氛围 |
-| 情感/感动 | 特写+柔光 | 突出面部表情 |
-| 环境/风景 | 远景+宽幅 | 展示宏大场景 |
-| 登场/亮相 | 中全景+仰视 | 突出气势 |
-| 内心/独白 | 特写+侧光 | 突出内心活动 |
-| 悬念/紧张 | 特写+暗调 | 加强紧张感 |
-| 离别/分别 | 远景+背影 | 营造离别感 |
+## 常见修正
+
+- 角色漂移：重复固定特征并增加正确参考图。
+- 多手多指：简化手部动作，避免多人手部交叠。
+- 错误文字：加强无文字约束并移除画面中的招牌、书页等文字载体。
+- 场景拥挤：减少背景人物和无关道具，只保留叙事必需元素。

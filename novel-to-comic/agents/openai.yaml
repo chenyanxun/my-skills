@@ -1,4 +1,0 @@
-interface:
-  display_name: "小说转漫画"
-  short_description: "根据小说章节内容生成漫画图片，按小说->章节->图片存放"
-  default_prompt: "请帮我将这篇小说章节生成漫画"

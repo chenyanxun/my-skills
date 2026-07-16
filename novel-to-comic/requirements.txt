@@ -1,0 +1,4 @@
+requests==2.32.4
+readability-lxml==0.8.4.1
+newspaper3k==0.2.8
+lxml_html_clean==0.4.2
